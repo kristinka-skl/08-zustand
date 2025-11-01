@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     siteName: "NoteHub",
     images: [
       {
-        url: "https://ibb.co/XrZJCfWQ",
+        url: "https://i.ibb.co/217Kk0F9/Chat-GPT-Image-Nov-1-2025-10-29-30-PM.png",
         width: 1200,
         height: 630,
         alt: "NoteHub",
