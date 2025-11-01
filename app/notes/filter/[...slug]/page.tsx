@@ -28,7 +28,7 @@ export async function generateMetadata({
       siteName: "NoteHub",
       images: [
         {
-          url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
+          url: "https://i.ibb.co/hRmh19Gt/Note-Hub-green.png",
           width: 1200,
           height: 630,
           alt: `Notes within the category ${category}`,
