@@ -1,12 +1,11 @@
 "use client";
 import css from "./page.module.css";
-import Modal from "@/components/Modal/Modal";
-import NoteForm from "@/components/NoteForm/NoteForm";
 import NoteList from "@/components/NoteList/NoteList";
 import Pagination from "@/components/Pagination/Pagination";
 import SearchBox from "@/components/SearchBox/SearchBox";
 import { fetchNotes } from "@/lib/api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { useDebouncedCallback } from "use-debounce";
@@ -18,10 +17,7 @@ interface FilterPageClientProps {
 export default function FilterPageClient({ category }: FilterPageClientProps) {
   const [query, setQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
   const { data, isError, isSuccess } = useQuery({
     queryKey: ["note", query, currentPage, category],
     queryFn: () => fetchNotes(query, currentPage, category),
@@ -50,19 +46,14 @@ export default function FilterPageClient({ category }: FilterPageClientProps) {
             />
           )}
           {
-            <button className={css.button} onClick={openModal}>
+            <Link href={"/notes/action/create"} className={css.button}>
               Create note +
-            </button>
+            </Link>
           }
         </header>
 
         <Toaster position="top-right" reverseOrder={false} />
         {isSuccess && data.notes.length > 0 && <NoteList notes={data.notes} />}
-        {isModalOpen && (
-          <Modal onClose={closeModal}>
-            <NoteForm onClose={closeModal} />
-          </Modal>
-        )}
       </div>
     </>
   );

@@ -5,9 +5,38 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 import FilterPageClient from "./Notes.client";
+import { Metadata } from "next";
 
 interface FilterPageProps {
   params: Promise<{ slug: string[] }>;
+}
+interface GenerateMetadataProps {
+  params: Promise<{ slug: string[] }>;
+}
+export async function generateMetadata({
+  params,
+}: GenerateMetadataProps): Promise<Metadata> {
+  const { slug } = await params;
+  const category = slug[0] === "all" ? "all" : slug[0];
+  return {
+    title: `NoteHub`,
+    description: `Notes within the category ${category}`,
+    openGraph: {
+      title: `NoteHub`,
+      description: `Notes within the category ${category}`,
+      url: `https://notehub.com/notes/filter/${category}`,
+      siteName: "NoteHub",
+      images: [
+        {
+          url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
+          width: 1200,
+          height: 630,
+          alt: `Notes within the category ${category}`,
+        },
+      ],
+      type: "article",
+    },
+  };
 }
 
 export default async function FilterPage({ params }: FilterPageProps) {
