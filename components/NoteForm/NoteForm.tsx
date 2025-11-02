@@ -1,13 +1,14 @@
 // у цьому файлі дуже намучилась з валідацією і довелось використовувати чат жпт. Будь ласка, допоможіть розібратись як треба було правильно
 "use client";
 import css from "./NoteForm.module.css";
-import { FormEvent, useId, useState } from "react";
+import { FormEvent, useEffect, useId, useState } from "react";
 import * as Yup from "yup";
 import { createNote } from "../../lib/api";
 import type { NoteFormData } from "../../types/note";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { useNoteDraftStore } from "@/lib/store/noteStore";
 
 const initialValues: NoteFormData = {
   title: "",
@@ -28,7 +29,10 @@ const NoteFormSchema = Yup.object().shape({
 export default function NoteForm() {
   const queryClient = useQueryClient();
   const fieldId = useId();
-  const [formData, setFormData] = useState(initialValues);
+  const { draft, setDraft, clearDraft } = useNoteDraftStore();
+  const [formData, setFormData] = useState<NoteFormData>(
+    draft || initialValues
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const router = useRouter();
 
@@ -41,16 +45,23 @@ export default function NoteForm() {
       });
       toast("Successfully submitted!");
       setErrors({});
+      clearDraft();
       router.push("/notes/filter/all");
     },
     onError: () => toast("Sorry, something went wrong, please try again"),
   });
-
+  useEffect(() => {
+    setFormData(draft);
+  }, [draft]);
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
+    setDraft({
+      ...draft,
+      [e.target.name]: e.target.value,
+    });
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     const fieldSchema = Yup.reach(NoteFormSchema, name) as Yup.Schema<unknown>;
@@ -78,6 +89,7 @@ export default function NoteForm() {
       }
     }
   };
+
   return (
     <form className={css.form} onSubmit={handleSubmit} action="#">
       <label htmlFor={`${fieldId}-title`}>Title</label>
@@ -86,7 +98,7 @@ export default function NoteForm() {
         type="text"
         name="title"
         className={css.input}
-        value={formData.title}
+        value={draft.title ? draft.title : initialValues.title}
         onChange={handleChange}
       />
       {errors.title && <span className={css.error}>{errors.title}</span>}
@@ -95,7 +107,7 @@ export default function NoteForm() {
         id={`${fieldId}-content`}
         name="content"
         rows={8}
-        value={formData.content}
+        value={draft.content ? draft.content : initialValues.content}
         onChange={handleChange}
         className={css.textarea}
       />
@@ -105,7 +117,7 @@ export default function NoteForm() {
         id={`${fieldId}-tag`}
         name="tag"
         className={css.select}
-        value={formData.tag}
+        value={draft.tag ? draft.tag : initialValues.tag}
         onChange={handleChange}
       >
         <option value="Todo">Todo</option>
@@ -118,7 +130,7 @@ export default function NoteForm() {
         <button
           type="button"
           className={css.cancelButton}
-          onClick={() => router.back()}
+          onClick={() => router.push("/notes/filter/all")}
         >
           Cancel
         </button>
