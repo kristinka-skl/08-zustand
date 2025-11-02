@@ -30,9 +30,6 @@ export default function NoteForm() {
   const queryClient = useQueryClient();
   const fieldId = useId();
   const { draft, setDraft, clearDraft } = useNoteDraftStore();
-  const [formData, setFormData] = useState<NoteFormData>(
-    draft || initialValues
-  );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const router = useRouter();
 
@@ -50,9 +47,6 @@ export default function NoteForm() {
     },
     onError: () => toast("Sorry, something went wrong, please try again"),
   });
-  useEffect(() => {
-    setFormData(draft);
-  }, [draft]);
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -63,7 +57,6 @@ export default function NoteForm() {
       [e.target.name]: e.target.value,
     });
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
     const fieldSchema = Yup.reach(NoteFormSchema, name) as Yup.Schema<unknown>;
     fieldSchema
       .validate(value)
@@ -76,9 +69,9 @@ export default function NoteForm() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      await NoteFormSchema.validate(formData, { abortEarly: false });
+      await NoteFormSchema.validate(draft, { abortEarly: false });
       setErrors({});
-      mutate(formData);
+      mutate(draft);
     } catch (err) {
       if (err instanceof Yup.ValidationError) {
         const newErrors: Record<string, string> = {};
@@ -98,7 +91,7 @@ export default function NoteForm() {
         type="text"
         name="title"
         className={css.input}
-        value={draft.title ? draft.title : initialValues.title}
+        value={draft.title || initialValues.title}
         onChange={handleChange}
       />
       {errors.title && <span className={css.error}>{errors.title}</span>}
@@ -107,7 +100,7 @@ export default function NoteForm() {
         id={`${fieldId}-content`}
         name="content"
         rows={8}
-        value={draft.content ? draft.content : initialValues.content}
+        value={draft.content || initialValues.content}
         onChange={handleChange}
         className={css.textarea}
       />
@@ -117,7 +110,7 @@ export default function NoteForm() {
         id={`${fieldId}-tag`}
         name="tag"
         className={css.select}
-        value={draft.tag ? draft.tag : initialValues.tag}
+        value={draft.tag || initialValues.tag}
         onChange={handleChange}
       >
         <option value="Todo">Todo</option>
